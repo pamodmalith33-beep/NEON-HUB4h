@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeonHub | Premium Gaming Experience</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-primary': '#0a0a0f',
+            'bg-secondary': '#13141c',
+            'neon-blue': '#00f0ff',
+            'neon-purple': '#b026ff',
+          },
+          fontFamily: {
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            glow: {
+              '0%': { 'box-shadow': '0 0 5px rgba(0, 240, 255, 0.2)' },
+              '100%': { 'box-shadow': '0 0 20px rgba(0, 240, 255, 0.6)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer base {
+      body {
+        @apply bg-bg-primary text-gray-100 font-outfit overflow-x-hidden;
+      }
+    }
+    @layer components {
+      .glass-nav {
+        @apply fixed top-0 w-full z-[1000] bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between transition-all duration-300;
+      }
+      .btn-premium {
+        @apply px-8 py-3 rounded-full font-extrabold uppercase tracking-widest transition-all duration-500 transform hover:-translate-y-1 active:scale-95 text-sm;
+      }
+      .btn-cyan {
+        @apply bg-gradient-to-r from-neon-blue to-blue-600 text-black shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_40px_rgba(0,240,255,0.7)];
+      }
+      .btn-purple {
+        @apply bg-gradient-to-r from-neon-purple to-pink-600 text-white shadow-[0_0_20px_rgba(176,38,255,0.4)] hover:shadow-[0_0_40px_rgba(176,38,255,0.7)];
+      }
+      .card-premium {
+        @apply bg-bg-secondary rounded-2xl overflow-hidden border border-white/5 transition-all duration-500 hover:border-neon-purple/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:-translate-y-2;
+      }
+      .neon-text-blue {
+        @apply text-neon-blue drop-shadow-[0_0_10px_rgba(0,240,255,0.5)];
+      }
+      .neon-text-purple {
+        @apply text-neon-purple drop-shadow-[0_0_10px_rgba(176,38,255,0.5)];
+      }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a0f; }
+    ::-webkit-scrollbar-thumb { background: #1f1f2e; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #b026ff; }
+
+    /* Hero Banner Gradient */
+    .hero-overlay {
+      background: linear-gradient(to right, #0a0a0f 0%, rgba(10,10,15,0.6) 50%, transparent 100%),
+                  linear-gradient(to top, #0a0a0f 0%, transparent 40%);
+    }
+
+    /* Hide scrollbar for clean rows */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-bg-primary">
+
+  <!-- NAVBAR -->
+  <nav id="navbar" class="glass-nav">
+    <div class="flex items-center gap-12">
+      <h2 class="text-2xl font-black tracking-tighter cursor-pointer flex items-center gap-2 group" onclick="goHome()">
+        <span class="text-white group-hover:neon-text-blue transition-all">NEON</span><span class="text-neon-blue group-hover:text-white transition-all">HUB</span>
+      </h2>
+      <div class="hidden md:flex items-center gap-8 font-semibold text-sm tracking-widest text-gray-400">
+        <a href="#" onclick="goHome(event)" class="hover:text-white transition-colors flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> HOME</a>
+        <a href="#" onclick="goGames(event)" class="hover:text-white transition-colors flex items-center gap-2"><i data-lucide="gamepad-2" class="w-4 h-4"></i> GAMES</a>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-6">
+      <!-- Search -->
+      <div class="relative hidden sm:block">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+        <input type="text" id="site-search" placeholder="Search games..." 
+          class="bg-white/5 border border-white/10 rounded-full py-2 pl-12 pr-6 outline-none focus:border-neon-purple/50 focus:bg-white/10 transition-all w-64 text-sm"
+          onkeyup="handleLiveSearch()">
+        <div id="search-results" class="absolute top-full left-0 w-full mt-4 bg-bg-secondary border border-white/10 rounded-2xl shadow-2xl hidden z-[2000] overflow-hidden"></div>
+      </div>
+
+      <button onclick="goFavorites()" class="p-2 hover:bg-white/10 rounded-full transition-colors relative group">
+        <i data-lucide="heart" class="w-6 h-6 text-gray-400 group-hover:text-pink-500 transition-colors"></i>
+        <span id="fav-count-badge" class="absolute -top-1 -right-1 bg-red-500 text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+      </button>
+
+      <div id="auth-nav-section">
+        <button onclick="goAuth('login')" class="px-6 py-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-all font-bold text-xs">SIGN IN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================= -->
+  <!-- HOME VIEW               -->
+  <!-- ======================= -->
+  <main id="home-view" class="pt-20">
+    <!-- Hero Section -->
+    <div class="relative h-[85vh] flex items-center px-6 lg:px-20 overflow-hidden">
+      <!-- Animated Background Particles -->
+      <div class="absolute inset-0 z-0 bg-[radial-gradient(circle_at_30%_30%,rgba(176,38,255,0.1),transparent)]"></div>
+      
+      <div class="relative z-10 max-w-4xl">
+        <span class="inline-block px-4 py-1 rounded-full bg-neon-purple/20 text-neon-purple text-xs font-black tracking-[0.2em] mb-6 animate-pulse">NEXT GEN GAMING</span>
+        <h1 id="home-main-title" class="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter">
+          ULTIMATE <br> <span class="bg-gradient-to-r from-neon-blue to-blue-500 bg-clip-text text-transparent">GAMING PORTAL</span>
+        </h1>
+        <p id="home-main-subtitle" class="text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed font-light">
+          Immerse yourself in the largest curated collection of premium viral games and high-performance repacks. Built for gamers, by gamers.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <button onclick="goGames()" class="btn-premium btn-cyan">Explore Library</button>
+          <button onclick="goFavorites()" class="btn-premium bg-white/5 border border-white/10 hover:bg-white/10">My Collection</button>
+        </div>
+      </div>
+
+      <!-- Feature Visual -->
+      <div class="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full hidden lg:flex items-center justify-center opacity-40">
+        <div class="relative w-[500px] h-[500px]">
+           <div class="absolute inset-0 rounded-full animate-pulse-slow bg-neon-blue/20 blur-[100px]"></div>
+           <div class="absolute top-1/4 left-1/4 w-full h-full border border-neon-blue/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
+           <div class="absolute top-1/4 left-1/4 w-full h-full border border-neon-purple/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats/Features -->
+    <div class="px-6 lg:px-20 py-20 bg-black/30">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="p-8 rounded-3xl bg-bg-secondary border border-white/5 hover:border-neon-blue/30 transition-all group">
+                <i data-lucide="zap" class="w-12 h-12 text-neon-blue mb-6 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-bold mb-4">Instant Access</h3>
+                <p class="text-gray-400 leading-relaxed text-sm">Download your favorite games at maximum speed with our optimized peer-to-peer network infrastructure.</p>
+            </div>
+            <div class="p-8 rounded-3xl bg-bg-secondary border border-white/5 hover:border-pink-500/30 transition-all group">
+                <i data-lucide="shield-check" class="w-12 h-12 text-pink-500 mb-6 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-bold mb-4">Verified Repacks</h3>
+                <p class="text-gray-400 leading-relaxed text-sm">Every game in our library is extensively tested for stability, performance, and security.</p>
+            </div>
+            <div class="p-8 rounded-3xl bg-bg-secondary border border-white/5 hover:border-neon-purple/30 transition-all group">
+                <i data-lucide="layout-grid" class="w-12 h-12 text-neon-purple mb-6 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-bold mb-4">Massive Library</h3>
+                <p class="text-gray-400 leading-relaxed text-sm">From indie gems to multi-AAA blockbusters, find exactly what you're looking for.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trending Row -->
+    <div class="py-24">
+        <div class="px-6 lg:px-20 flex justify-between items-end mb-12">
+            <div>
+                <h2 class="text-4xl font-black mb-2 flex items-center gap-4">TRENDING <span class="bg-red-500 w-3 h-3 rounded-full animate-ping"></span></h2>
+                <p class="text-gray-500 uppercase tracking-widest text-xs font-bold">What everyone is playing right now</p>
+            </div>
+            <button onclick="goGames()" class="text-neon-blue text-sm font-bold hover:underline transition-all">VIEW ALL GAMES &rarr;</button>
+        </div>
+        <div id="home-trending-row" class="flex gap-8 overflow-x-auto px-6 lg:px-20 pb-12 no-scrollbar scroll-smooth">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+  </main>
+
+  <!-- ======================= -->
+  <!-- GAMES VIEW              -->
+  <!-- ======================= -->
+  <main id="games-view" class="pt-24 hidden">
+    <!-- Hero Slider -->
+    <div id="hero-slider" class="relative h-[65vh] mx-6 lg:mx-20 rounded-[40px] overflow-hidden mb-16 shadow-2xl">
+        <div id="hero-banner" class="absolute inset-0 bg-cover bg-center transition-all duration-1000"></div>
+        <div class="hero-overlay absolute inset-0"></div>
+        <div class="absolute inset-0 flex items-center px-12 lg:px-24">
+            <div class="max-w-2xl">
+                <span id="hero-tag" class="inline-block px-3 py-1 rounded bg-neon-blue/20 text-neon-blue text-[10px] font-black tracking-widest mb-4">EDITOR'S CHOICE</span>
+                <h2 id="hero-title" class="text-5xl lg:text-7xl font-black mb-6 leading-none">Loading...</h2>
+                <p id="hero-desc" class="text-gray-300 mb-10 max-w-lg line-clamp-3"></p>
+                <button id="hero-btn" class="btn-premium btn-cyan">Get Details</button>
+            </div>
+        </div>
+        <!-- Hero Pagination -->
+        <div class="absolute bottom-10 right-10 flex gap-2" id="hero-dots"></div>
+    </div>
+
+    <div class="px-6 lg:px-20">
+        <div class="flex items-center gap-4 mb-12">
+            <h2 class="text-3xl font-black">GAME LIBRARY</h2>
+            <div class="h-[1px] flex-grow bg-white/10"></div>
+            <div class="flex gap-2">
+                <button class="p-2 rounded bg-white/5 border border-white/10 hover:border-neon-blue transition-all"><i data-lucide="filter" class="w-4 h-4"></i></button>
+            </div>
+        </div>
+        <div id="game-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+        <div id="pagination" class="flex justify-center items-center py-20 gap-2"></div>
+    </div>
+  </main>
+
+  <!-- ======================= -->
+  <!-- SINGLE VIEW             -->
+  <!-- ======================= -->
+  <main id="single-view" class="hidden">
+    <div class="relative h-[70vh] w-full overflow-hidden">
+        <video id="page-video-player" class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline poster=""></video>
+        <div class="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/40 to-transparent"></div>
+        
+        <div class="absolute inset-0 flex flex-col justify-end px-6 lg:px-20 pb-20">
+            <div class="max-w-5xl">
+                <button onclick="goBack()" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors group">
+                    <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i> BACK TO LIBRARY
+                </button>
+                <span id="page-tag" class="px-3 py-1 rounded bg-neon-purple/30 text-neon-purple text-[10px] font-black tracking-tighter uppercase mb-4 inline-block"></span>
+                <h1 id="page-title" class="text-6xl md:text-8xl font-black mb-8 leading-none tracking-tight"></h1>
+                
+                <div class="flex flex-wrap gap-4 items-center">
+                    <button id="page-dl" onclick="startDownloadTimer()" class="btn-premium btn-cyan flex items-center gap-3">
+                        <i data-lucide="download" class="w-5 h-5"></i> DOWNLOAD NOW
+                    </button>
+                    <button id="single-fav-btn" onclick="executeSingleToggleFav()" class="btn-premium bg-white/5 border border-white/10 flex items-center gap-3">
+                        <i id="single-fav-heart" data-lucide="heart" class="w-5 h-5"></i> FAVORITE
+                    </button>
+                    <button onclick="toggleMute()" class="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all">
+                        <i id="mute-icon" data-lucide="volume-x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Content -->
+    <div class="px-6 lg:px-20 -mt-10 relative z-10 pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <!-- Requirements -->
+            <div class="lg:col-span-2">
+                <div class="bg-bg-secondary p-10 rounded-[30px] border border-white/5 shadow-2xl">
+                    <h3 class="text-2xl font-black mb-10 flex items-center gap-4">
+                        <i data-lucide="monitor" class="text-neon-blue"></i> SYSTEM REQUIREMENTS
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="p-8 bg-black/40 rounded-2xl border border-white/5">
+                            <h4 class="text-gray-400 text-xs font-black mb-6 uppercase tracking-widest">Minimum</h4>
+                            <ul id="page-sys-min" class="space-y-4 text-sm font-medium text-gray-300"></ul>
+                        </div>
+                        <div class="p-8 bg-neon-blue/5 rounded-2xl border border-neon-blue/20">
+                            <h4 class="text-neon-blue text-xs font-black mb-6 uppercase tracking-widest">Recommended</h4>
+                            <ul id="page-sys-rec" class="space-y-4 text-sm font-medium text-gray-300"></ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 p-8 border-t border-white/5">
+                        <h4 class="text-xs font-black mb-6 uppercase tracking-widest text-gray-500">About the game</h4>
+                        <p id="page-desc" class="text-gray-400 leading-relaxed font-light text-lg italic"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="space-y-8">
+                <div class="card-premium">
+                    <img id="page-img" src="" class="w-full aspect-video object-cover">
+                    <div class="p-8">
+                        <div class="flex justify-between items-center py-4 border-b border-white/5">
+                            <span class="text-gray-500 text-xs font-bold">REPACK SIZE</span>
+                            <span id="page-size" class="text-neon-purple font-black"></span>
+                        </div>
+                        <div class="flex justify-between items-center py-4 border-b border-white/5">
+                            <span class="text-gray-500 text-xs font-bold">RELEASE DATE</span>
+                            <span class="font-bold">2024 (Latest)</span>
+                        </div>
+                        <div class="flex justify-between items-center py-4">
+                            <span class="text-gray-500 text-xs font-bold">AVAILABILITY</span>
+                            <span class="text-green-500 font-bold flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span> ONLINE
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-8 rounded-[30px] bg-gradient-to-br from-neon-blue/10 to-transparent border border-neon-blue/20">
+                   <h4 class="font-black mb-4">NEED HELP?</h4>
+                   <p class="text-xs text-gray-400 leading-relaxed mb-6">If you encounter any issues during installation, check our FAQ or join the discord community.</p>
+                   <button class="w-full py-3 rounded-full bg-white text-black font-black text-xs">JOIN SUPPORT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  </main>
+
+  <!-- ======================= -->
+  <!-- AUTH VIEW               -->
+  <!-- ======================= -->
+  <main id="auth-view" class="hidden pt-32 pb-20">
+    <div class="max-w-md mx-auto bg-bg-secondary p-12 rounded-[40px] border border-white/10 shadow-3xl">
+        <div id="login-form">
+            <h2 class="text-4xl font-black mb-2">WELCOME</h2>
+            <p class="text-gray-500 mb-10 text-sm">Sign in to your NeonHub account</p>
+            <div class="space-y-4">
+                <input type="text" id="login-user" placeholder="USERNAME" class="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-2xl focus:border-neon-blue outline-none transition-all">
+                <input type="password" id="login-pass" placeholder="PASSWORD" class="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-2xl focus:border-neon-blue outline-none transition-all">
+                <button onclick="handleAuth('login')" class="w-full btn-premium btn-cyan py-5 !rounded-2xl mt-8">SIGN INTO PORTAL</button>
+            </div>
+            <p class="mt-8 text-center text-xs text-gray-500 font-bold">NO ACCOUNT? <span onclick="toggleAuth('signup')" class="text-neon-blue cursor-pointer hover:underline">CREATE ONE</span></p>
+        </div>
+        <div id="signup-form" class="hidden">
+            <h2 class="text-4xl font-black mb-2">JOIN US</h2>
+            <p class="text-gray-500 mb-10 text-sm">Start your premium gaming journey</p>
+            <div class="space-y-4">
+                <input type="text" id="signup-user" placeholder="USERNAME" class="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-2xl focus:border-neon-purple outline-none transition-all">
+                <input type="email" id="signup-email" placeholder="EMAIL ADDRESS" class="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-2xl focus:border-neon-purple outline-none transition-all">
+                <input type="password" id="signup-pass" placeholder="PASSWORD" class="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-2xl focus:border-neon-purple outline-none transition-all">
+                <button onclick="handleAuth('signup')" class="w-full btn-premium btn-purple py-5 !rounded-2xl mt-8">CREATE ACCOUNT</button>
+            </div>
+            <p class="mt-8 text-center text-xs text-gray-500 font-bold">HAVE ACCOUNT? <span onclick="toggleAuth('login')" class="text-neon-purple cursor-pointer hover:underline">SIGN IN</span></p>
+        </div>
+    </div>
+  </main>
+
+  <!-- ======================= -->
+  <!-- FAVORITES VIEW          -->
+  <!-- ======================= -->
+  <main id="fav-view" class="hidden pt-32 px-6 lg:px-20 pb-20">
+    <div class="mb-16">
+        <h1 class="text-6xl font-black tracking-tighter mb-4">MY <span class="neon-text-purple text-white">COLLECTION</span></h1>
+        <p class="text-gray-500 uppercase font-black tracking-widest text-xs">Saved games for your next session</p>
+    </div>
+    
+    <div id="fav-games-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+    <div id="no-fav-games" class="hidden text-center py-40 border-2 border-dashed border-white/5 rounded-[40px]">
+        <i data-lucide="frown" class="w-16 h-16 text-gray-600 mx-auto mb-6"></i>
+        <h3 class="text-xl font-bold text-gray-400">YOUR COLLECTION IS EMPTY</h3>
+        <button onclick="goGames()" class="mt-8 btn-premium bg-white/10 hover:bg-white/20">Find Games</button>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-black py-20 px-6 lg:px-20 border-t border-white/5">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-10">
+        <h2 class="text-2xl font-black tracking-tighter">NEON<span class="text-neon-blue">HUB</span></h2>
+        <div class="flex gap-10 text-xs font-black tracking-[0.2em] text-gray-500">
+            <a href="#" class="hover:text-white transition-colors">PRIVACY</a>
+            <a href="#" class="hover:text-white transition-colors">TERMS</a>
+            <a href="#" class="hover:text-white transition-colors">SUPPORT</a>
+            <a href="#" class="hover:text-white transition-colors">DMCA</a>
+        </div>
+        <div class="flex gap-4">
+            <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><i data-lucide="twitter" class="w-4 h-4"></i></button>
+            <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><i data-lucide="instagram" class="w-4 h-4"></i></button>
+            <button class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><i data-lucide="twitch" class="w-4 h-4"></i></button>
+        </div>
+    </div>
+    <div class="text-center mt-20 text-[10px] text-gray-700 font-bold uppercase tracking-widest">
+        &copy; 2026 NEONHUB DIGITAL SOLUTIONS. ALL REPACKS ARE FOR DEMONSTRATION PURPOSES ONLY.
+    </div>
+  </footer>
+
+  <script>
+    // --- CORE LOGIC ---
+    let lastView = 'home'; 
+    let currentUser = JSON.parse(localStorage.getItem('neon_user')) || null;
+    let favorites = JSON.parse(localStorage.getItem('neon_favs')) || { games: [] };
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Data
+    const gamesData = [
+      { title: "Grand Theft Auto V", size: "~105GB", badge: "OPEN WORLD", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg", desc: "Three criminals, one city. Grand Theft Auto V is the ultimate open-world masterpiece.", min: ["Win 8.1 64 Bit", "4GB RAM", "9800 GT 1GB"], rec: ["Win 10 64 Bit", "8GB RAM", "GTX 660 2GB"] },
+      { title: "Red Dead Redemption 2", size: "~120GB", badge: "ADVENTURE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg", desc: "Arthur Morgan and the Van der Linde gang are outlaws on the run. The end of the wild west era has begun.", min: ["i5-2500K", "8GB RAM", "GTX 770"], rec: ["i7-4770K", "12GB RAM", "GTX 1060"] },
+      { title: "Cyberpunk 2077", size: "~70GB", badge: "RPG", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg", desc: "Night City will change you forever. Immerse yourself in the dark future of an obsessed megalopolis.", min: ["i7-6700", "8GB RAM", "GTX 1060"], rec: ["i7-12700", "16GB RAM", "RTX 3070"] },
+      { title: "Elden Ring", size: "~60GB", badge: "DARK FANTASY", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg", desc: "Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring.", min: ["i5-8400", "12GB RAM", "1060 3GB"], rec: ["i7-10700", "16GB RAM", "3060 TI"] },
+      { title: "The Witcher 3", size: "~45GB", badge: "LEGENDARY", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg", desc: "Geralt of Rivia is a witcher, a professional monster hunter, on a quest to find the child of prophecy.", min: ["i5-2500K", "6GB RAM", "GTX 660"], rec: ["i7-3770", "8GB RAM", "GTX 770"] },
+      { title: "God of War", size: "~70GB", badge: "SONY PC", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg", desc: "Kratos is a father again. As mentor and protector to Atreus, he must survive dangerous lands.", min: ["i5-2500k", "8GB RAM", "GTX 960"], rec: ["i5-6600k", "8GB RAM", "GTX 1060"] },
+      { title: "God of War Ragnarök", size: "~190GB", badge: "EPIC", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg", desc: "Fimbulwinter is well underway. Kratos and Atreus must journey to each of the Nine Realms.", min: ["i5-4670k", "8GB RAM", "GTX 1060"], rec: ["i5-8600k", "16GB RAM", "RTX 3060"] },
+      { title: "Spider-Man Remastered", size: "~75GB", badge: "SONY PC", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg", desc: "The worlds of Peter Parker and Spider-Man collide in an original action-packed story.", min: ["i3-4160", "8GB RAM", "GTX 950"], rec: ["i5-4670", "16GB RAM", "GTX 1060"] },
+      { title: "Ghost of Tsushima", size: "~75GB", badge: "SAMURAI", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2215430/header.jpg", desc: "In the late 13th century, the Mongol empire has laid waste to entire nations.", min: ["i3-7100", "8GB RAM", "GTX 960"], rec: ["i5-8600", "16GB RAM", "RTX 2060"] },
+      { title: "Horizon Forbidden West", size: "~150GB", badge: "SONY PC", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420110/header.jpg", desc: "Join Aloy as she braves the Forbidden West – a majestic but dangerous frontier.", min: ["i3-8100", "16GB RAM", "GTX 1650"], rec: ["i5-8600", "16GB RAM", "RTX 3060"] },
+      { title: "The Last of Us Part I", size: "~100GB", badge: "DRAMA", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888140/header.jpg", desc: "Experience the emotional storytelling and unforgettable characters in The Last of Us.", min: ["i5-4670", "16GB RAM", "RX 470"], rec: ["i5-8600K", "16GB RAM", "RTX 2060"] },
+      { title: "Baldur's Gate 3", size: "~150GB", badge: "GOTY", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg", desc: "Gather your party and return to the Forgotten Realms in a tale of fellowship and betrayal.", min: ["i5-4690", "8GB RAM", "GTX 970"], rec: ["i7-8700K", "16GB RAM", "RTX 2060 Super"] },
+      { title: "Starfield", size: "~125GB", badge: "SCI-FI", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/header.jpg", desc: "Starfield is the first new universe in 25 years from Bethesda Game Studios.", min: ["i7-6800K", "16GB RAM", "GTX 1070 TI"], rec: ["i5-10600K", "16GB RAM", "RTX 2080"] },
+      { title: "Sekiro: Shadows Die Twice", size: "~25GB", badge: "ACTION", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg", desc: "Carve your own clever path to vengeance in this award-winning adventure.", min: ["i3-2100", "4GB RAM", "GTX 760"], rec: ["i5-2500K", "8GB RAM", "GTX 970"] },
+      { title: "Dark Souls III", size: "~25GB", badge: "HARDCORE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/374320/header.jpg", desc: "As fires fade and the world falls into ruin, journey once more into a world filled with colossal enemies.", min: ["i3-2100", "4GB RAM", "GTX 750 Ti"], rec: ["i7-3770", "8GB RAM", "GTX 970"] },
+      { title: "Assassin's Creed Valhalla", size: "~110GB", badge: "VIKING", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2208920/header.jpg", desc: "Become a legendary Viking warrior on a quest for glory.", min: ["Ryzen 3 1200", "8GB RAM", "GTX 960"], rec: ["Ryzen 7 1700", "8GB RAM", "GTX 1080"] },
+      { title: "AC IV: Black Flag", size: "~30GB", badge: "PIRATE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/242050/header.jpg", desc: "The Golden Age of Piracy. Command your ship and engage in massive naval battles.", min: ["Core 2 Quad Q8400", "2GB RAM", "GTX 260"], rec: ["Core i5-2400S", "4GB RAM", "GTX 470"] },
+      { title: "Far Cry 6", size: "~90GB", badge: "SHOOTER", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2369390/header.jpg", desc: "Welcome to Yara, a tropical paradise frozen in time.", min: ["Ryzen 3 1200", "8GB RAM", "RX 460"], rec: ["Ryzen 5 3600X", "16GB RAM", "GTX 1080"] },
+      { title: "Far Cry 5", size: "~40GB", badge: "ACTION", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/552520/header.jpg", desc: "Welcome to Hope County, Montana, land of the free and the brave but also home to a fanatical doomsday cult.", min: ["i5-2400", "8GB RAM", "GTX 670"], rec: ["i7-4770", "8GB RAM", "GTX 970"] },
+      { title: "Forza Horizon 5", size: "~110GB", badge: "RACING", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1551360/header.jpg", desc: "Your ultimate Horizon Adventure awaits! Explore the vibrant open world landscapes of Mexico.", min: ["i5-4460", "8GB RAM", "GTX 970"], rec: ["i7-10700", "16GB RAM", "RTX 3080"] },
+      { title: "EA Sports FC 24", size: "~50GB", badge: "SPORTS", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2195250/header.jpg", desc: "Experience unrivaled authenticity in EA SPORTS FC 24, the most true-to-football experience ever.", min: ["i5-6600K", "8GB RAM", "GTX 1050 Ti"], rec: ["i7-6700", "12GB RAM", "GTX 1660"] },
+      { title: "FIFA 23", size: "~60GB", badge: "FOOTBALL", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1811260/header.jpg", desc: "The world's game brings even more football action and realism to the pitch.", min: ["i5 6600k", "8GB RAM", "GTX 1050 Ti"], rec: ["i7 6700", "12GB RAM", "GTX 1660"] },
+      { title: "NBA 2K24", size: "~130GB", badge: "BASKETBALL", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2338770/header.jpg", desc: "Experience the future of sports gaming. Gather your squad and experience the past, present, and future of hoops.", min: ["i3-2100", "4GB RAM", "GTX 750 Ti"], rec: ["i5-4430", "8GB RAM", "GTX 770"] },
+      { title: "Resident Evil 4", size: "~60GB", badge: "HORROR", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg", desc: "Survival is just the beginning. Six years have passed since the biological disaster in Raccoon City.", min: ["Ryzen 3 1200", "8GB RAM", "GTX 1050 Ti"], rec: ["Ryzen 5 3600", "16GB RAM", "GTX 1070"] },
+      { title: "Resident Evil Village", size: "~30GB", badge: "SCARY", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1196590/header.jpg", desc: "Experience survival horror like never before in the eighth major installment in the RE series.", min: ["i5-7500", "8GB RAM", "GTX 1050 Ti"], rec: ["i7-8700", "16GB RAM", "GTX 1070"] },
+      { title: "Silent Hill 2", size: "~50GB", badge: "REMAKE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124490/header.jpg", desc: "Having received a letter from his deceased wife, James returns to the place where they made so many memories.", min: ["i5-8400", "12GB RAM", "GTX 1070"], rec: ["i7-8700K", "16GB RAM", "RTX 2080"] },
+      { title: "Dead Space", size: "~50GB", badge: "SCI-FI HORROR", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1693980/header.jpg", desc: "The sci-fi survival-horror classic returns, completely rebuilt from the ground up.", min: ["Ryzen 5 2600", "16GB RAM", "RX 5700"], rec: ["Ryzen 5 5600X", "16GB RAM", "RTX 2070"] },
+      { title: "NFS Unbound", size: "~50GB", badge: "STREET RACE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1849250/header.jpg", desc: "Race against time, outsmart the cops, and take on weekly qualifiers to reach The Grand.", min: ["i5-8600", "8GB RAM", "GTX 1050 Ti"], rec: ["i7-8700", "16GB RAM", "RTX 2070"] },
+      { title: "NFS Heat", size: "~35GB", badge: "RACING", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1108000/header.jpg", desc: "Hustle by day and risk it all by night in Need for Speed Heat.", min: ["FX-6350", "8GB RAM", "GTX 760"], rec: ["i7-4790", "16GB RAM", "GTX 1060"] },
+      { title: "The Sims 4", size: "~60GB", badge: "SIMULATION", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1222670/header.jpg", desc: "Unleash your imagination and create a world of unique Sims!", min: ["i3-3220", "4GB RAM", "GTX 650"], rec: ["i5-4670", "8GB RAM", "GTX 960"] },
+      { title: "Cities: Skylines", size: "~15GB", badge: "CITY BUILD", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/255710/header.jpg", desc: "Cities: Skylines is a modern take on the classic city simulation.", min: ["i7-930", "4GB RAM", "GTX 660"], rec: ["i5-3470", "6GB RAM", "GTX 760"] },
+      { title: "Palworld", size: "~40GB", badge: "POKEMON FIGHT", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1623730/header.jpg", desc: "Fight, farm, build and work alongside mysterious creatures called Pals in this open-world survival.", min: ["i5-3570K", "16GB RAM", "GTX 1050"], rec: ["i9-9900K", "32GB RAM", "RTX 2070"] },
+      { title: "Helldivers 2", size: "~100GB", badge: "CO-OP", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg", desc: "Join the Helldivers and fight for freedom across a hostile galaxy in a fast, frantic, and ferocious action.", min: ["i7-4790K", "8GB RAM", "GTX 1050 Ti"], rec: ["i7-9700K", "16GB RAM", "RTX 2060"] },
+      { title: "Lethal Company", size: "~1GB", badge: "VIRAL", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/header.jpg", desc: "A co-op horror about scavenging at abandoned moons to sell scrap to the Company.", min: ["i5-4670", "4GB RAM", "GTX 1050"], rec: ["i5-6600", "8GB RAM", "GTX 1060"] },
+      { title: "Among Us", size: "~1GB", badge: "SOCIAL", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/945360/header.jpg", desc: "Play with 4-15 players online or via local WiFi as you attempt to prepare your spaceship for departure.", min: ["Win 7 SP1+", "1GB RAM", "SSE2 support"], rec: ["Win 10", "2GB RAM", "DirectX 10"] },
+      { title: "Terraria", size: "~1GB", badge: "SANDBOX", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg", desc: "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.", min: ["Dual Core 2.0 Ghz", "2.5GB RAM", "128MB Video"], rec: ["Dual Core 3.0 Ghz", "4GB RAM", "256MB Video"] },
+      { title: "Stardew Valley", size: "~1GB", badge: "FARMING", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg", desc: "You've inherited your grandfather's old farm plot in Stardew Valley.", min: ["2 Ghz", "2GB RAM", "256MB Video"], rec: ["3 Ghz", "4GB RAM", "512MB Video"] },
+      { title: "No Man's Sky", size: "~15GB", badge: "SPACE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/header.jpg", desc: "Inspired by the adventure and imagination that we love from classic science-fiction.", min: ["i3", "8GB RAM", "GTX 480"], rec: ["i5", "16GB RAM", "GTX 1060"] },
+      { title: "Subnautica", size: "~20GB", badge: "OCEAN", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/264710/header.jpg", desc: "Descend into the depths of an alien underwater world filled with wonder and peril.", min: ["i3", "4GB RAM", "Intel HD 4600"], rec: ["i5", "8GB RAM", "GTX 550 Ti"] },
+      { title: "Sons of the Forest", size: "~20GB", badge: "SURVIVAL", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1326420/header.jpg", desc: "Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape.", min: ["i5-8400", "12GB RAM", "GTX 1060"], rec: ["i7-8700K", "16GB RAM", "GTX 1080 Ti"] },
+      { title: "Phasmophobia", size: "~21GB", badge: "GHOST", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/739630/header.jpg", desc: "Phasmophobia is a 4-player, online co-op, psychological horror.", min: ["i5-4590", "8GB RAM", "GTX 970"], rec: ["i5-10600", "16GB RAM", "RTX 2060"] },
+      { title: "Valorant", size: "FREE", badge: "F2P COMPETITIVE", img: "https://upload.wikimedia.org/wikipedia/en/a/a2/Valorant_cover.png", desc: "Riot's character-based 5v5 tactical shooter where precise gunplay meets unique agent abilities.", min: ["i3-4150", "4GB RAM", "GT 730"], rec: ["i5-4460", "4GB RAM", "GTX 1050 Ti"] },
+      { title: "Spider-Man 2", size: "PENDING", badge: "COMING SOON", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1817190/header.jpg", desc: "The next evolution of the Spider-Man franchise, coming soon to PC.", min: ["TBA", "16GB RAM", "GTX 1070"], rec: ["TBA", "32GB RAM", "RTX 3070"] },
+      { title: "GTA VI", size: "PENDING", badge: "LEGENDARY", img: "https://upload.wikimedia.org/wikipedia/en/a/a5/Grand_Theft_Auto_VI_logo.png", desc: "Grand Theft Auto VI heads to the state of Leonida, home to the neon-soaked streets of Vice City.", min: ["TBA", "16GB RAM", "TBA"], rec: ["TBA", "32GB RAM", "TBA"] },
+      { title: "Call of Duty", size: "~1.5GB", badge: "FPS", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2620/header.jpg", desc: "The original masterpiece that started the legendary franchise.", min: ["PIII 800MHz", "128MB RAM", "32MB GPU"], rec: ["PIV 1.2GHz", "256MB RAM", "64MB GPU"] },
+      { title: "CoD: Black Ops II", size: "~16GB", badge: "FUTURE WAR", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/202970/header.jpg", desc: "A branching storyline set in 2025. Your choices decide the fate of the world.", min: ["Core 2 Duo E8200", "2GB RAM", "512MB GPU"], rec: ["Core i5-2500K", "4GB RAM", "1.5GB GPU"] },
+      { title: "CoD: WWII", size: "~90GB", badge: "WWII", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/476600/header.jpg", desc: "Returning to the roots. Gritty, cinematic, and visceral World War II action.", min: ["Core i3-3225", "8GB RAM", "GTX 660"], rec: ["Core i7-6700", "16GB RAM", "GTX 1060"] },
+      { title: "CoD: MW III (2023)", size: "~200GB", badge: "FINAL", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2519060/header.jpg", desc: "Adapt or die in a fight against the ultimate threat. Makarov is back.", min: ["Core i5-6600", "8GB RAM", "GTX 960"], rec: ["Core i7-6700K", "16GB RAM", "RTX 3060 TI"] },
+      { title: "Far Cry 3", size: "~15GB", badge: "CLASSIC", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/220240/header.jpg", desc: "Far away from civilization lies an island, a lawless place ruled by violence.", min: ["i3", "4GB RAM", "GTX 8800"], rec: ["i7", "8GB RAM", "GTX 480"] },
+      { title: "Far Cry 4", size: "~30GB", badge: "HIMALAYAS", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/298110/header.jpg", desc: "Hidden in the towering Himalayas lies Kyrat, a country steeped in tradition and violence.", min: ["i5-750", "4GB RAM", "GTX 460"], rec: ["i5-2400S", "8GB RAM", "GTX 680"] },
+      { title: "Assassin's Creed II", size: "~8GB", badge: "LEGACY", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/33230/header.jpg", desc: "The masterpiece that introduced Ezio Auditore di Firenze.", min: ["1.8 GHz Core 2 Duo", "2GB RAM", "256MB Video"], rec: ["2.6 GHz Core 2 Duo", "4GB RAM", "512MB Video"] },
+      { title: "Uncharted 4", size: "~120GB", badge: "SONY PC", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1659420/header.jpg", desc: "Nathan Drake is forced back into the world of thieves in this epic conclusion.", min: ["i5-4430", "8GB RAM", "GTX 960"], rec: ["i7-4770", "16GB RAM", "GTX 1060"] },
+      { title: "Minecraft", size: "~2GB", badge: "SANDBOX", img: "https://upload.wikimedia.org/wikipedia/en/5/51/Minecraft_cover.png", desc: "Explore infinite worlds and build everything from the simplest of homes to the grandest of castles.", min: ["i3-3210", "4GB RAM", "Intel HD 4000"], rec: ["i5-4690", "8GB RAM", "GTX 700"] },
+      { title: "Sekiro", size: "~25GB", badge: "ACTION", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg", desc: "Carve your own clever path to vengeance in this award-winning adventure.", min: ["i3-2100", "4GB RAM", "GTX 760"], rec: ["i5-2500K", "8GB RAM", "GTX 970"] },
+      { title: "Stardew Valley", size: "~1GB", badge: "RELAX", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg", desc: "You've inherited your grandfather's old farm plot in Stardew Valley.", min: ["2GHz", "2GB RAM", "256MB Video"], rec: ["2GHz", "2GB RAM", "512MB Video"] },
+      { title: "No Man's Sky", size: "~15GB", badge: "SPACE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/header.jpg", desc: "Explore an infinite procedurally generated universe.", min: ["i3", "8GB RAM", "GTX 480"], rec: ["i5", "16GB RAM", "GTX 1060"] },
+      { title: "Genshin Impact", size: "FREE", badge: "F2P", img: "https://upload.wikimedia.org/wikipedia/en/5/5d/Genshin_Impact_cover.png", desc: "A massive open-world RPG adventure.", min: ["i5", "8GB RAM", "GT 1030"], rec: ["i7", "16GB RAM", "GTX 1060"] },
+      { title: "Persona 5 Royal", size: "~40GB", badge: "JRPG", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg", desc: "Don the mask and join the Phantom Thieves.", min: ["i7-6700", "8GB RAM", "GTX 650 Ti"], rec: ["i7-6700", "8GB RAM", "GTX 760"] },
+      { title: "Naruto Storm 4", size: "~40GB", badge: "ANIME", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/349040/header.jpg", desc: "The ultimate ninja battle experience.", min: ["i3-530", "4GB RAM", "1GB Video"], rec: ["i5-2500", "8GB RAM", "2GB Video"] },
+      { title: "Jump Force", size: "~20GB", badge: "ANIME BATTLE", img: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/816020/header.jpg", desc: "The most famous Manga heroes are thrown into a whole new battleground.", min: ["i5-2300", "4GB RAM", "GTX 660"], rec: ["i7-6700", "8GB RAM", "GTX 1060"] }
+    ];
+
+    // Navigation
+    function hideAllViews() {
+      ['home-view', 'games-view', 'single-view', 'auth-view', 'fav-view'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      const video = document.getElementById('page-video-player');
+      if(video) video.pause();
+    }
+
+    function goHome(e) {
+      if(e) e.preventDefault();
+      hideAllViews();
+      document.getElementById('home-view').classList.remove('hidden');
+      renderTrending();
+      window.scrollTo(0,0);
+    }
+
+    function goGames(e) {
+      if(e) e.preventDefault();
+      hideAllViews();
+      document.getElementById('games-view').classList.remove('hidden');
+      renderGrid();
+      startHeroSlider();
+      window.scrollTo(0,0);
+    }
+
+    function goFavorites() {
+      hideAllViews();
+      document.getElementById('fav-view').classList.remove('hidden');
+      renderFavs();
+      window.scrollTo(0,0);
+    }
+
+    function goAuth(mode) {
+      hideAllViews();
+      document.getElementById('auth-view').classList.remove('hidden');
+      toggleAuth(mode);
+      window.scrollTo(0,0);
+    }
+
+    function toggleAuth(mode) {
+      document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
+      document.getElementById('signup-form').classList.toggle('hidden', mode !== 'signup');
+    }
+
+    function goBack() {
+        goGames();
+    }
+
+    // Rendering
+    function renderTrending() {
+      const row = document.getElementById('home-trending-row');
+      row.innerHTML = '';
+      gamesData.slice(0, 6).forEach((game, i) => {
+        const isFav = favorites.games.includes(game.title);
+        row.innerHTML += `
+          <div class="min-w-[300px] card-premium group flex-shrink-0">
+            <div class="relative overflow-hidden aspect-video">
+                <img src="${game.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <button onclick="toggleFav(event, '${game.title}')" class="absolute top-4 right-4 p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white transition-all group/fav">
+                    <i data-lucide="heart" class="w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : 'text-white group-hover/fav:text-red-500'}"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <span class="text-[10px] font-black tracking-widest text-neon-blue mb-2 block uppercase">${game.badge}</span>
+                <h3 class="text-xl font-bold mb-4">${game.title}</h3>
+                <button onclick="openGame(${i})" class="w-full py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all font-black text-[10px] tracking-widest">VIEW INTEL</button>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    let currentPage = 1;
+    function renderGrid() {
+      const grid = document.getElementById('game-grid');
+      grid.innerHTML = '';
+      gamesData.forEach((game, i) => {
+        const isFav = favorites.games.includes(game.title);
+        grid.innerHTML += `
+          <div class="card-premium group">
+            <div class="relative overflow-hidden aspect-[4/3]">
+                <img src="${game.img}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-bg-secondary via-transparent to-transparent"></div>
+                <button onclick="toggleFav(event, '${game.title}')" class="absolute top-4 right-4 p-3 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white group/fav">
+                    <i data-lucide="heart" class="w-5 h-5 ${isFav ? 'fill-red-500 text-red-500' : 'text-white group-hover/fav:text-red-500'}"></i>
+                </button>
+                <div class="absolute bottom-4 left-4">
+                    <span class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[10px] font-black text-neon-blue border border-white/5 uppercase tracking-tighter">${game.badge}</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2">${game.title}</h3>
+                <p class="text-[10px] text-gray-500 font-bold tracking-widest mb-6 uppercase flex items-center gap-2"><i data-lucide="database" class="w-3 h-3 text-neon-purple"></i> ${game.size}</p>
+                <button onclick="openGame(${i})" class="w-full py-3 rounded-xl bg-neon-blue/10 text-neon-blue border border-neon-blue/20 group-hover:bg-neon-blue group-hover:text-black transition-all font-black uppercase text-xs tracking-widest">GET ACCESS</button>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    function renderFavs() {
+      const grid = document.getElementById('fav-games-grid');
+      const empty = document.getElementById('no-fav-games');
+      grid.innerHTML = '';
+      
+      const favItems = gamesData.filter(g => favorites.games.includes(g.title));
+      
+      if(favItems.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      
+      empty.classList.add('hidden');
+      favItems.forEach((game) => {
+         const idx = gamesData.findIndex(g => g.title === game.title);
+         grid.innerHTML += `
+          <div class="card-premium">
+            <img src="${game.img}" class="w-full aspect-video object-cover">
+            <div class="p-6">
+                <h3 class="text-lg font-bold mb-4">${game.title}</h3>
+                <div class="flex gap-2">
+                    <button onclick="openGame(${idx})" class="flex-grow py-3 rounded-xl bg-neon-blue text-black font-black text-[10px] tracking-widest">OPEN</button>
+                    <button onclick="toggleFav(event, '${game.title}')" class="p-3 rounded-xl bg-white/5 border border-white/10 text-red-500 transition-all hover:bg-red-500 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+          </div>
+         `;
+      });
+      lucide.createIcons();
+    }
+
+    // Game Page Logic
+    function openGame(index) {
+      const game = gamesData[index];
+      hideAllViews();
+      document.getElementById('single-view').classList.remove('hidden');
+      
+      document.getElementById('page-title').innerText = game.title;
+      document.getElementById('page-desc').innerText = game.desc;
+      document.getElementById('page-tag').innerText = game.badge;
+      document.getElementById('page-size').innerText = game.size;
+      document.getElementById('page-img').src = game.img;
+      currentDownloadLink = `https://fitgirl-repacks.site/?s=${encodeURIComponent(game.title)}`;
+      
+      const minList = document.getElementById('page-sys-min');
+      const recList = document.getElementById('page-sys-rec');
+      minList.innerHTML = ''; recList.innerHTML = '';
+      game.min.forEach(s => minList.innerHTML += `<li>${s}</li>`);
+      game.rec.forEach(s => recList.innerHTML += `<li>${s}</li>`);
+      
+      updateSingleFavBtn(game.title);
+      
+      // Enable premium background video
+      const video = document.getElementById('page-video-player');
+      video.poster = game.img;
+      // Using a premium futuristic ambient video as a high-end default
+      const defaultVid = "https://assets.mixkit.co/videos/preview/mixkit-futuristic-technology-particle-world-3058-large.mp4";
+      video.src = game.vid || defaultVid;
+      video.load();
+      video.play().catch(() => {
+          // Fallback if autoplay is blocked
+          console.log("Autoplay blocked, user interaction required");
+      });
+      
+      window.scrollTo(0,0);
+    }
+
+    function toggleFav(e, title) {
+      if(e) e.stopPropagation();
+      const idx = favorites.games.indexOf(title);
+      if(idx > -1) favorites.games.splice(idx, 1);
+      else favorites.games.push(title);
+      
+      localStorage.setItem('neon_favs', JSON.stringify(favorites));
+      updateFavBadge();
+      
+      // Update UI
+      if(!document.getElementById('home-view').classList.contains('hidden')) renderTrending();
+      if(!document.getElementById('games-view').classList.contains('hidden')) renderGrid();
+      if(!document.getElementById('fav-view').classList.contains('hidden')) renderFavs();
+      if(!document.getElementById('single-view').classList.contains('hidden')) updateSingleFavBtn(title);
+    }
+
+    function updateFavBadge() {
+        const badge = document.getElementById('fav-count-badge');
+        badge.innerText = favorites.games.length;
+        badge.classList.toggle('hidden', favorites.games.length === 0);
+    }
+
+    function updateSingleFavBtn(title) {
+        const isFav = favorites.games.includes(title);
+        const heart = document.getElementById('single-fav-heart');
+        const btn = document.getElementById('single-fav-btn');
+        
+        heart.setAttribute('data-lucide', 'heart');
+        if(isFav) {
+            heart.classList.add('fill-red-500', 'text-red-500');
+            btn.classList.add('!bg-red-500/10', '!border-red-500/50');
+        } else {
+            heart.classList.remove('fill-red-500', 'text-red-500');
+            btn.classList.remove('!bg-red-500/10', '!border-red-500/50');
+            heart.classList.add('text-white');
+        }
+        lucide.createIcons();
+    }
+
+    function executeSingleToggleFav() {
+        const title = document.getElementById('page-title').innerText;
+        toggleFav(null, title);
+    }
+
+    function toggleMute() {
+        const v = document.getElementById('page-video-player');
+        const i = document.getElementById('mute-icon');
+        v.muted = !v.muted;
+        i.setAttribute('data-lucide', v.muted ? 'volume-x' : 'volume-2');
+        lucide.createIcons();
+    }
+
+    function handleAuth(type) {
+        const user = document.getElementById(`${type}-user`).value;
+        if(!user) return alert("Please enter credentials");
+        currentUser = { username: user };
+        localStorage.setItem('neon_user', JSON.stringify(currentUser));
+        updateAuthNav();
+        goHome();
+    }
+
+    function logout() {
+        currentUser = null;
+        localStorage.removeItem('neon_user');
+        updateAuthNav();
+        goHome();
+    }
+
+    function updateAuthNav() {
+        const sec = document.getElementById('auth-nav-section');
+        if(currentUser) {
+            sec.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-neon-blue hidden sm:block">AGENT: ${currentUser.username}</span>
+                    <button onclick="logout()" class="p-2 rounded-full border border-white/10 hover:bg-red-500 hover:text-white transition-all"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                </div>
+            `;
+        } else {
+            sec.innerHTML = `<button onclick="goAuth('login')" class="px-6 py-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-all font-bold text-xs uppercase tracking-tighter">SIGN IN</button>`;
+        }
+        lucide.createIcons();
+    }
+
+    // Hero Slider logic for Games view
+    let heroTimer = null;
+    let currentHero = 0;
+    function startHeroSlider() {
+        if(heroTimer) clearInterval(heroTimer);
+        updateHero();
+        heroTimer = setInterval(() => {
+            currentHero = (currentHero + 1) % 4;
+            updateHero();
+        }, 6000);
+    }
+
+    function updateHero() {
+        const game = gamesData[currentHero];
+        const banner = document.getElementById('hero-banner');
+        banner.style.backgroundImage = `url('${game.img}')`;
+        document.getElementById('hero-title').innerText = game.title.toUpperCase();
+        document.getElementById('hero-desc').innerText = game.desc;
+        document.getElementById('hero-btn').onclick = () => openGame(currentHero);
+        
+        const dots = document.getElementById('hero-dots');
+        dots.innerHTML = '';
+        for(let i=0; i<4; i++) {
+            dots.innerHTML += `<div class="w-2 h-2 rounded-full transition-all ${i===currentHero ? 'bg-neon-blue w-8' : 'bg-white/20'}"></div>`;
+        }
+    }
+
+    // Live Search
+    function handleLiveSearch() {
+        const query = document.getElementById('site-search').value.toLowerCase();
+        const res = document.getElementById('search-results');
+        if(!query) { res.classList.add('hidden'); return; }
+        
+        const matches = gamesData.filter(g => g.title.toLowerCase().includes(query));
+        res.innerHTML = '';
+        if(matches.length === 0) {
+            res.innerHTML = '<div class="p-4 text-xs text-gray-500 text-center font-bold">NO INTEL FOUND</div>';
+        } else {
+            matches.forEach(m => {
+                const idx = gamesData.findIndex(g => g.title === m.title);
+                res.innerHTML += `
+                    <div onclick="openGame(${idx})" class="p-4 hover:bg-white/5 cursor-pointer flex items-center gap-4 border-b border-white/5 last:border-0 transition-colors">
+                        <img src="${m.img}" class="w-12 h-12 rounded object-cover">
+                        <div>
+                            <div class="text-xs font-bold leading-none mb-1">${m.title}</div>
+                            <div class="text-[8px] font-black text-neon-blue tracking-tighter uppercase">${m.badge}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        res.classList.remove('hidden');
+    }
+
+    window.onclick = (e) => {
+        if(!e.target.closest('.relative')) document.getElementById('search-results').classList.add('hidden');
+    };
+
+    window.onload = () => {
+        updateAuthNav();
+        updateFavBadge();
+        renderTrending();
+        // Check for theme consistency
+        lucide.createIcons();
+    };
+    // Scroll Effect for Nav
+    window.onscroll = () => {
+        const nav = document.getElementById('navbar');
+        if(window.scrollY > 50) {
+            nav.classList.add('!py-3', '!bg-black/80');
+        } else {
+            nav.classList.remove('!py-3', '!bg-black/80');
+        }
+    }
+
+    let currentDownloadLink = "";
+    let downloadTimer = null;
+
+    function startDownloadTimer() {
+        const btn = document.getElementById('page-dl');
+        if (downloadTimer) return;
+        
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        let timeLeft = 20;
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> PREPARING... ${timeLeft}s`;
+        lucide.createIcons();
+
+        downloadTimer = setInterval(() => {
+            timeLeft--;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> PREPARING... ${timeLeft}s`;
+            lucide.createIcons();
+            
+            if (timeLeft <= 0) {
+                clearInterval(downloadTimer);
+                downloadTimer = null;
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lucide.createIcons();
+                window.location.href = currentDownloadLink;
+            }
+        }, 1000);
+    }
+  </script>
+</body>
+</html>
